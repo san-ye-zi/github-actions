@@ -3,11 +3,16 @@ name: "Pull Request Labeler"
 on:
   workflow_call:
     inputs:
+      config-repo:
+        description: 'Organization/repository for central configs (leave empty for local)'
+        type: string
+        required: false
+        default: ''
       config-path:
         description: 'Path to the labeler configuration file'
         required: false
-        default: '.github/labeler.yml'
         type: string
+        default: '.github/labeler.yml'
       sync-labels:
         description: 'Whether to remove labels when matching files are reverted'
         required: false
@@ -16,19 +21,31 @@ on:
 
 jobs:
   labeler:
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       pull-requests: write
-    runs-on: ubuntu-latest
     steps:
-      - name: Labeler
-        uses: actions/labeler@v6
+      # 1. Checkout the central config repository ONLY if config-repo is provided
+      - name: Checkout Central Config
+        if: ${{ inputs.config-repo != '' }}
+        uses: actions/checkout@v4
         with:
-          # The GITHUB_TOKEN is automatically available to reusable workflows
-          repo-token: "${{ secrets.GITHUB_TOKEN }}"
-          configuration-path: ${{ inputs.config-path }}
-          sync-labels: ${{ inputs.sync-labels }}
+          repository: ${{ inputs.config-repo }}
+          path: 'shared-config'
 
+      # 2. Run the labeler
+      - name: Labeler
+        uses: actions/labeler@v5
+        with:
+          repo-token: "${{ secrets.GITHUB_TOKEN }}"
+          # If config-repo is provided, use the 'shared-config' prefix. 
+          # Otherwise, use the path directly (local repo).
+          configuration-path: >-
+            ${{ inputs.config-repo != '' 
+                && format('shared-config/{0}', inputs.config-path) 
+                || inputs.config-path }}
+          sync-labels: ${{ inputs.sync-labels }}
 
 # HOW TO USE THIS WORKFLOW
 # name: "CI Labeling"
@@ -39,6 +56,7 @@ jobs:
 # jobs:
 #   call-labeler:
 #     # Replace 'owner/repo' with your shared workflow location
-#     uses: owner/repo/.github/workflows/reusable-labeler.yml@v1
+#     uses: my-org/central-configs/.github/workflows/labeler-reusable.yml@v1
 #     with:
 #       config-path: '.github/custom-labels.yml'
+#       config-repo: 'my-org/central-configs'

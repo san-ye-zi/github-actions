@@ -1,0 +1,87 @@
+name: Flutter Localization
+
+on:
+  workflow_call:
+    inputs:
+      flutter-version:
+        description: 'Flutter version to use'
+        required: false
+        type: string
+        default: '3.38.5'
+      flutter-channel:
+        description: 'Flutter channel (stable, beta, dev)'
+        required: false
+        type: string
+        default: 'stable'
+      runs-on:
+        description: 'Runner to use for the job'
+        required: false
+        type: string
+        default: 'ubuntu-latest'
+      working-directory:
+        description: 'Working directory for Flutter commands'
+        required: false
+        type: string
+        default: '.'
+      fail-on-changes:
+        description: 'Fail if l10n files are not up to date'
+        required: false
+        type: boolean
+        default: true
+      l10n-command:
+        description: 'Custom l10n generation command'
+        required: false
+        type: string
+        default: 'flutter gen-l10n'
+    outputs:
+      l10n-status:
+        description: 'Status of l10n validation (up-to-date or outdated)'
+        value: ${{ jobs.l10n-validation.outputs.status }}
+
+jobs:
+  l10n-validation:
+    name: Validate Localization
+    runs-on: ${{ inputs.runs-on }}
+    outputs:
+      status: ${{ steps.check-changes.outputs.status }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ inputs.flutter-version }}
+          channel: ${{ inputs.flutter-channel }}
+          cache: true
+
+      - name: Get dependencies
+        working-directory: ${{ inputs.working-directory }}
+        run: flutter pub get
+
+      - name: Generate l10n
+        working-directory: ${{ inputs.working-directory }}
+        run: ${{ inputs.l10n-command }}
+
+      - name: Check for l10n changes
+        id: check-changes
+        working-directory: ${{ inputs.working-directory }}
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "status=outdated" >> $GITHUB_OUTPUT
+            echo "❌ L10n files are not up to date. Run '${{ inputs.l10n-command }}' and commit changes."
+            echo ""
+            echo "Changed files:"
+            git status --short
+            echo ""
+            echo "Diff:"
+            git diff
+            
+            if [ "${{ inputs.fail-on-changes }}" = "true" ]; then
+              exit 1
+            fi
+          else
+            echo "status=up-to-date" >> $GITHUB_OUTPUT
+            echo "✅ L10n files are up to date"
+          fi

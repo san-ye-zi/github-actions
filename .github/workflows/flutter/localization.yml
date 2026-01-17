@@ -85,3 +85,26 @@ jobs:
             echo "status=up-to-date" >> $GITHUB_OUTPUT
             echo "✅ L10n files are up to date"
           fi
+
+# HOW TO USE THIS WORKFLOW
+# name: Flutter Localization
+
+# on:
+#   pull_request:
+#     branches:
+#       - main
+#     paths:
+#       - 'lib/l10n/**'
+#       - '**/l10n.yaml'
+
+
+# concurrency:
+#   group: ${{ github.workflow }}-${{ github.ref }}
+#   cancel-in-progress: true
+
+# jobs:
+#   localization:
+#     uses: san-ye-zi/github-actions/.github/workflows/flutter/localization.yml@main
+#     with:
+#       fail-on-changes: true
+#       l10n-command: 'flutter gen-l10n'

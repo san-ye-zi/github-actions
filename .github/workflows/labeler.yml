@@ -1,0 +1,44 @@
+name: "Pull Request Labeler"
+
+on:
+  workflow_call:
+    inputs:
+      config-path:
+        description: 'Path to the labeler configuration file'
+        required: false
+        default: '.github/labeler.yml'
+        type: string
+      sync-labels:
+        description: 'Whether to remove labels when matching files are reverted'
+        required: false
+        default: true
+        type: boolean
+
+jobs:
+  labeler:
+    permissions:
+      contents: read
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Labeler
+        uses: actions/labeler@v6
+        with:
+          # The GITHUB_TOKEN is automatically available to reusable workflows
+          repo-token: "${{ secrets.GITHUB_TOKEN }}"
+          configuration-path: ${{ inputs.config-path }}
+          sync-labels: ${{ inputs.sync-labels }}
+
+
+# HOW TO USE THIS WORKFLOW
+# name: "CI Labeling"
+
+# on:
+#   pull_request_target:
+
+# jobs:
+#   call-labeler:
+#     # Replace 'owner/repo' with your shared workflow location
+#     uses: owner/repo/.github/workflows/reusable-labeler.yml@v1
+#     with:
+#       config-path: '.github/custom-labels.yml'

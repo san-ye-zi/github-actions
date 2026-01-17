@@ -1,0 +1,49 @@
+# Automatically label PRs based on changed files
+
+'platform: android':
+  - changed-files:
+    - any-glob-to-any-file: 'android/**/*'
+
+'platform: ios':
+  - changed-files:
+    - any-glob-to-any-file: 'ios/**/*'
+
+'platform: web':
+  - changed-files:
+    - any-glob-to-any-file: 'web/**/*'
+
+'UI':
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'lib/screens/**/*'
+      - 'lib/widgets/**/*'
+      - 'lib/ui/**/*'
+
+'l10n':
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'lib/l10n/**/*'
+      - '**/*.arb'
+
+'tests':
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'test/**/*'
+      - '**/*_test.dart'
+
+'CI/CD':
+  - changed-files:
+    - any-glob-to-any-file:
+      - '.github/**/*'
+
+'dependencies':
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'pubspec.yaml'
+      - 'pubspec.lock'
+
+'documentation':
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/*.md'
+      - 'docs/**/*'

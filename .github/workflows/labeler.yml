@@ -54,7 +54,7 @@ jobs:
 #   pull_request_target:
 
 # jobs:
-#   call-labeler:
+#   labeler:
 #     # Replace 'owner/repo' with your shared workflow location
 #     uses: my-org/central-configs/.github/workflows/labeler-reusable.yml@v1
 #     with:

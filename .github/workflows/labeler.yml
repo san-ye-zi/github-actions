@@ -34,6 +34,22 @@ jobs:
           repository: ${{ inputs.config-repo }}
           path: 'shared-config'
 
+      # 2. Debug: list shared-config contents
+      - name: List Shared Config Files
+        if: ${{ inputs.config-repo != '' }}
+        shell: bash
+        run: |
+          echo "== Root directory =="
+          ls -la
+
+          echo
+          echo "== shared-config directory =="
+          ls -la shared-config || echo "shared-config directory does not exist"
+
+          echo
+          echo "== Expected config path =="
+          ls -la shared-config/${{ inputs.config-path }} || echo "Config file not found"
+
       # 2. Run the labeler
       - name: Labeler
         uses: actions/labeler@v5
